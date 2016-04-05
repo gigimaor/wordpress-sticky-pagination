@@ -1,6 +1,18 @@
 # wordpress-sticky-pagination
 Inline sticky post to a list of posts that using pagination
 
+The issue:
+Wordpress WP_query and pagination, using sticky post from page 2 and more add this post to the list in the first page as additional post. it increasing the number of posts for the first page.
+
+If you like to keep the number of posts on the first page as configured, but be able to add unlimited sticky posts to the top of the list.
+
+First
+Add sticky posts list before the main list (only for first page)
+
+Second 
+Offset the number of the sticky posts on a spesific page number for the main list (for all other pages then the first)
+
+
 <code><pre>
 function get_lastest_posts($ignore_sticky_posts=true){
   //get page number
