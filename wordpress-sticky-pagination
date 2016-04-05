@@ -1,0 +1,59 @@
+function get_lastest_posts($ignore_sticky_posts=true){
+	global $paged;
+	$paged = ( get_query_var('page') ) ? get_query_var('page') : 1;
+	$posts_per_page = 6;
+	//first page is sticky from other page exist - reduce number of visible
+	$args = array(
+		'post_status' =>  'publish',
+		'posts_per_page' => $posts_per_page,
+		'orderby' => 'date',
+		'order'   => 'DESC',
+		'paged' => $paged,
+		'category__not_in' => get_term_by('name', 'uncategorized', 'category')->term_id
+	);
+
+	$sticky = get_option( 'sticky_posts' );
+	$sticky_count = 0;
+	if($sticky)
+		$sticky_count = sizeof($sticky);
+
+	if($sticky_count > 0){
+		if($paged == 1 ){
+			$args['post__in'] = $sticky;
+			$local_sticky_wp_query = new WP_Query( $args );
+		}
+		else{
+	        $page_offset = ( ($paged-1) * $posts_per_page ) - $sticky_count;
+	        var_dump($page_offset);
+	        $args['offset'] =  $page_offset ;
+		}
+		//reset main list
+		$args['posts_per_page'] = $posts_per_page - $sticky_count;
+		$args['post__in'] = null;
+		$args['post__not_in'] = $sticky;
+	}
+	if($paged > 1 ){
+		$args['posts_per_page'] = $posts_per_page;
+	}
+
+	$args['ignore_sticky_posts'] = $sticky_count;
+
+	$local_wp_query = new WP_Query( $args );
+
+	if($local_wp_query->post_count > 0){
+		?><section class="latest-posts">
+			<h2>Latest</h2>
+		 	<div class="list-wrap">
+    			<div class="list clearfix">
+    				<div class="row"><?php
+			if($sticky_count > 0 && $paged == 1){
+				get_list_items($local_sticky_wp_query,false);
+			}
+
+			get_list_items($local_wp_query,true);
+				?>	</div>
+				</div>
+			</div>
+		</section><?php
+	}
+}
